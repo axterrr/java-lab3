@@ -1,3 +1,6 @@
+import java.net.HttpURLConnection
+import java.net.URI
+
 plugins {
     id("java")
 }
@@ -26,4 +29,25 @@ tasks.register("checkKeyApiExistence") {
         if (!file.exists())
             throw GradleException("$filePath is not found")
     }
+}
+
+tasks.register("checkExternalResourceAvailability") {
+    group = "custom"
+    doLast {
+        try {
+            val uri = URI("https://v6.exchangerate-api.com")
+            val url = uri.toURL()
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+            val responseCode = connection.responseCode
+            if (responseCode != HttpURLConnection.HTTP_OK)
+                throw GradleException("Resources are not available")
+        } catch (e: Exception) {
+            throw GradleException("External resources are not available")
+        }
+    }
+}
+
+tasks.named("build") {
+    dependsOn("checkExternalResourceAvailability", "checkKeyApiExistence")
 }
