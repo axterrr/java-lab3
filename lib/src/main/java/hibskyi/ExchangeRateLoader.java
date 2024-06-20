@@ -9,13 +9,11 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Scanner;
 
 public class ExchangeRateLoader {
 
-    public static Map<String, Double> loadRates(String currency) throws Exception {
+    public static String loadRatesJSON(String currency) throws Exception {
         String apiKey = readApiKey();
         String url = "https://v6.exchangerate-api.com/v6/"+apiKey+"/latest/"+currency;
         return getExchangeRates(url);
@@ -33,7 +31,7 @@ public class ExchangeRateLoader {
         }
     }
 
-    private static Map<String, Double> getExchangeRates(String url) throws Exception {
+    private static String getExchangeRates(String url) throws Exception {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpGet request = new HttpGet(url);
         HttpResponse response = httpClient.execute(request);
@@ -48,9 +46,7 @@ public class ExchangeRateLoader {
         JsonNode jsonNode = mapper.readTree(jsonResponse);
         JsonNode ratesNode = jsonNode.get("conversion_rates");
 
-        Map<String, Double> ratesMap = new HashMap<>();
-        ratesNode.fields().forEachRemaining(entry -> ratesMap.put(entry.getKey(), entry.getValue().asDouble()));
         httpClient.close();
-        return ratesMap;
+        return ratesNode.toString();
     }
 }
