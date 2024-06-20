@@ -18,3 +18,12 @@ tasks.test {
     useJUnitPlatform()
 }
 
+tasks.register("checkKeyApiExistence") {
+    group = "custom"
+    doLast {
+        val filePath = "lib/src/main/resources/exchangeRateApiKey.txt"
+        val file = file(filePath)
+        if (!file.exists())
+            throw GradleException("$filePath is not found")
+    }
+}
